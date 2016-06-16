@@ -1,0 +1,38 @@
+<div class="alert alert-danger" ng-show="data.error.code">
+{{data.error.message}}
+</div>
+
+<div class="panel panel-default" ng-hide="data.error.code == 'getMyTickets'">
+<table class="table">
+<thead>
+    <tr>
+    <th>Project</th>
+    <th>Subject</th>
+    <th>Status</th>
+    <th>Actions</th>
+    </tr>
+</thead>
+<tbody>
+<tr ng-repeat="task in data.result">
+  <td>{{task["task-description"] | description:'project'}}</td>
+  <td>{{task["task-description"] | description:'subject'}}</td>
+  <td>{{task["task-status"]}}</td>
+  <td>
+        <button class="btn btn-default" ng-show="task['task-status'] == 'Ready'" ng-click="processTicket(task['task-id'],'claimed')">Claim</button>
+        <button class="btn btn-default" ng-show="task['task-status'] == 'Reserved'" ng-click="processTicket(task['task-id'],'started')">Start</button>
+        <button class="btn btn-default" ng-show="task['task-status'] == 'Reserved'" ng-click="processTicket(task['task-id'],'released')">Release</button>
+        <button class="btn btn-default" ng-show="task['task-status'] == 'InProgress'" ng-click="processTicket(task['task-id'],'released')">Release</button>
+        <button class="btn btn-default" ng-show="task['task-status'] == 'InProgress'" ng-click="viewTicket(task['task-id'])">View</button>
+
+  </td>
+</tr>
+</tbody>
+</table>
+<nav>
+  <ul class="pager">
+    <li ng-hide="data.page == 0"><a href="" ng-click="getMyTickets(data.page - 1)">Previous</a></li>
+    <li class="disabled" ng-show="data.page == 0"><a href="" ng-click="getMyTickets(data.page - 1)">Previous</a></li>
+    <li><a href="" ng-click="getMyTickets(data.page + 1)">Next</button></li>
+  </ul>
+</nav>
+</div>

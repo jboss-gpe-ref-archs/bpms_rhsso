@@ -1,0 +1,41 @@
+<div class="alert alert-danger" ng-show="data.error.code">
+{{data.error.message}}
+</div>
+
+<div class="panel panel-default" ng-hide="data.error.code || data.result">
+  <div class="panel-heading">
+    <h3>Create a new ticket:</h3>
+  </div>
+  <form name="createTicketForm" novalidate>
+  <div class="panel-body">
+    <div class="form-group">
+      <label>Project</label>
+      <input class="form-control" ng-model="data.ticket.project" required/>
+    </div>
+    <div class="form-group">
+      <label>Subject</label>
+      <input class="form-control" ng-model="data.ticket.subject" required/>
+    </div>
+    <div class="form-group">
+      <label>Description</label>
+      <textarea class="form-control" ng-model="data.ticket.description" />
+    </div>
+    <div class="form-group">
+      <label>Assign to group(s)</label>
+      <input class="form-control" ng-model="data.ticket.groups"/>
+    </div>
+    <button type="submit" class="btn btn-default" ng-click="createTicket(data.ticket)">Create the ticket</button>
+  </div>
+  </form>
+</div>
+
+<div class="panel panel-default" ng-show="!data.error.code && data.result">
+  <div class="panel-body">
+    <h3>Ticket created.</h3>
+    <p>
+      Your ticket was created.</br>
+      Ticket reference : {{data.result}}
+    </p>
+    <button type="submit" class="btn btn-default" ng-click="reload()">Create another ticket</button>
+  </div>
+</div>

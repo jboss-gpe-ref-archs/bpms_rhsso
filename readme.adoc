@@ -1,0 +1,5 @@
+= Integration of BPMS with RH SSO
+
+== Purpose
+
+The purpose of this lab is to demonstrate how the BPMS execution server (KIE server) can be integrated with the Red Hat SSO product to provide Single Sign-On between a front-end application acting as a client to KIE server and the KIE server back-end.
