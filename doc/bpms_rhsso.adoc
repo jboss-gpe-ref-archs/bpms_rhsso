@@ -365,7 +365,8 @@ Save the file on your filesystem.
 ----
   "enable-cors" : true,
   "cors-max-age" : 1000,
-  "cors-allowed-methods" : "POST, PUT, DELETE, GET"
+  "cors-allowed-methods" : "POST, PUT, DELETE, GET",
+  "principal-attribute" : "preferred_username"
 ----
 +
 After the changes the file contents should look like:
@@ -380,11 +381,14 @@ After the changes the file contents should look like:
   "resource": "kieserver",
   "enable-cors" : true,
   "cors-max-age" : 1000,
-  "cors-allowed-methods" : "POST, PUT, DELETE, GET"
+  "cors-allowed-methods" : "POST, PUT, DELETE, GET",
+  "principal-attribute" : "preferred_username"
 }
 ----
 +
 The `enable-cors` setting enables CORS support by the RH SSO adapter. It will handle preflight requests and set the required HTTP headers. This is expecially important when accessing the KIE Server APIs through Javascript in a browser, as is the case for our AngularJS client app. For a good overview of  CORS, refer to http://www.html5rocks.com/en/tutorials/cors/
++
+The `principal-attribute` defines what user attribute should be used for the principal name of the logged in user. By default this will be the (generated) user ID. When set to `preferred_username`, the user name will be used instead.
 . Restart the KIE Server instance. +
 In a terminal window, `cd` to `<BPMS_HOME>/bin`, and execute the following command:
 +
