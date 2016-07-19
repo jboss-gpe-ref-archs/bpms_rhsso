@@ -120,7 +120,7 @@ $ rm standalone/deployments/dashbuilder.war.dodeploy
 admin1=8b68b1984bd2f4faf6b7a3c6a0c78968
 ----
 +
-This creates a user `admin` with password `admin`. Save the file.
+This creates a user `admin1` with password `admin`. Save the file.
 +
 .. Open `<BPMS_HOME>/standalone/configuration/application-roles.properties` for editing, and add the following line:
 +
