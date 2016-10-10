@@ -582,8 +582,8 @@ As part of the application bootstrap, a login sequence is initiated with the RH 
 The user is redirected to the RH SSO login screen.
 +
 image::images/rhsso-server-login-screen.png[]
-. Log in with one of the users thate were created in the `Kieserver` realm on the RH SSO server, e.g. `user1:user`.
-. The browser window is redirected to the AngularJS application, and access is granted to user 1.
+. Log in with one of the users that were created in the `Kieserver` realm on the RH SSO server, e.g. `user1:user`.
+. The browser window is redirected to the AngularJS application, and access is granted to `user1`.
 +
 image::images/angular-client-screen.png[]
 . From there on, you can start interacting with processes and tasks. +
