@@ -5,40 +5,39 @@
     angular.module('ticketApp', [ 'ngRoute' ]);
 
     function initializeKeycloak() {
-        var keycloakConfig = {
-            "url": "http://" + ENV.rhsso_host + ":" + ENV.rhsso_port + "/auth",
-            "realm": ENV.rhsso_realm,
-            "clientId": ENV.rhsso_clientId,
-            "credentials": {
-                "secret": ENV.rhsso_secret
-            }
-        };
-        var keycloak = Keycloak(keycloakConfig);
-        keycloak.init({
-            onLoad: 'login-required'
-        }).success(function () {
-            keycloak.loadUserInfo().success(function (userInfo) {
-                bootstrapAngular(keycloak, userInfo);
+
+        $.get('/api/config', function(data) {
+
+            var ENV = { 
+                'rhsso_host': data.rhsso_host, 
+                'rhsso_port' : data.rhsso_port,
+                'rhsso_realm': data.rhsso_realm,
+                'rhsso_clientId': data.rhsso_clientId,
+                'rhsso_secret': data.rhsso_secret
+            };
+            console.log(ENV);
+            var keycloakConfig = {
+                "url": "http://" + ENV.rhsso_host + ":" + ENV.rhsso_port + "/auth",
+                "realm": ENV.rhsso_realm,
+                "clientId": ENV.rhsso_clientId,
+                "credentials": {
+                    "secret": ENV.rhsso_secret
+                }
+            };
+            var keycloak = Keycloak(keycloakConfig);
+            keycloak.init({
+                onLoad: 'login-required'
+            }).success(function () {
+                keycloak.loadUserInfo().success(function (userInfo) {
+                    bootstrapAngular(keycloak, userInfo);
+                });
             });
         });
     }
 
     function bootstrapAngular(keycloak, userInfo) {
       angular
-        .module('ticketApp')
-        .factory("util", function () {
-            return {
-                getKieServerUrl: function() {
-                    return "http://" + ENV.kieserver_host + ":" + ENV.kieserver_port;
-                },
-                getTicketAppContainer: function() {
-                    return ENV.kieserver_containerId;
-                },
-                getTicketProcess: function() {
-                    return ENV.kieserver_processId;
-                }
-            }
-         })        
+        .module('ticketApp')     
         .run(function ($rootScope, $http, $interval) {
             var updateTokenInterval = $interval(function () {
                 // refresh token if it's valid for less then 15 minutes

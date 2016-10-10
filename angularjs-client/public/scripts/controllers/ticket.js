@@ -1,20 +1,16 @@
 'use strict';
 
 angular.module('ticketApp')
-    .controller('ticketCtrl', function ($scope, $http, $location, util, sharedStateService) {
+    .controller('ticketCtrl', function ($scope, $http, $location, sharedStateService) {
 
         $scope.data = {};
 
         $scope.getTask = function (id) {
-            var url = util.getKieServerUrl() 
-                + "/kie-server/services/rest/server/containers/"
-                + util.getTicketAppContainer()
-                + "/tasks/"
-                + id
-                + "?withInputData=true&withOutputData=true";
+            var url = "/api/tickets/"
+                + id;
 
+            //$http.defaults.headers.common.Authorization = 'Bearer ' + $scope.token;
             $http.defaults.headers.common.Authorization = 'Bearer ' + $scope.token;
-            $http.defaults.headers.common['Accept'] = "application/json";  
             $http.get(url)
                 .success(function (data) {
                     $scope.data.task = data;
@@ -28,20 +24,15 @@ angular.module('ticketApp')
 
         $scope.saveTask = function (task) {
 
-            var url = util.getKieServerUrl() 
-                + "/kie-server/services/rest/server/containers/"
-                + util.getTicketAppContainer()
-                + "/tasks/"
+            var url = "/api/tickets/"
                 + task["task-id"]
-                + "/contents/output";
+                + "/save";
 
             var outputData = {
                 comments : task['task-output-data']['comments']
             }
 
             $http.defaults.headers.common.Authorization = 'Bearer ' + $scope.token;
-            $http.defaults.headers.common['Accept'] = "application/json";
-            $http.defaults.headers.common['Content-type'] = "application/json";
             $http.put(url, outputData)
                 .success(function (data) {
                     
@@ -55,10 +46,7 @@ angular.module('ticketApp')
 
         $scope.completeTask = function (task) {
 
-            var url = util.getKieServerUrl() 
-                + "/kie-server/services/rest/server/containers/"
-                + util.getTicketAppContainer()
-                + "/tasks/"
+            var url = "/api/tickets/"
                 + task["task-id"]
                 + "/states/completed";
 
@@ -67,8 +55,6 @@ angular.module('ticketApp')
             }
 
             $http.defaults.headers.common.Authorization = 'Bearer ' + $scope.token;
-            $http.defaults.headers.common['Accept'] = "application/json";
-            $http.defaults.headers.common['Content-type'] = "application/json";
             $http.put(url, outputData)
                 .success(function (data) {
                     sharedStateService.setCurrentTask((function () {return;})());

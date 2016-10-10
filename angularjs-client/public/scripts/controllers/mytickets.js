@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('ticketApp')
-    .controller('myTicketsCtrl', function ($scope, $http, $location, util, sharedStateService) {
+    .controller('myTicketsCtrl', function ($scope, $http, $location, sharedStateService) {
     
         $scope.data = {};
 
@@ -15,12 +15,10 @@ angular.module('ticketApp')
 
             $scope.data.page = page;
 
-            var url = util.getKieServerUrl() 
-                + "/kie-server/services/rest/server/queries/tasks/instances/pot-owners"
+            var url = "/api/mytickets"
                 + "?page=" + page;
 
             $http.defaults.headers.common.Authorization = 'Bearer ' + $scope.token;
-            $http.defaults.headers.common['Accept'] = "application/json";  
             $http.get(url)
                 .success(function (data) {
                     $scope.data.result = data['task-summary'];
@@ -34,25 +32,20 @@ angular.module('ticketApp')
         };
 
         $scope.processTicket = function (id, op) {
-            var url = util.getKieServerUrl()
-                + "/kie-server/services/rest/server/containers/"
-                + util.getTicketAppContainer()
-                + "/tasks/"
+            var url = "/api/tickets/"
                 + id
                 + "/states/"
                 + op;
 
             $http.defaults.headers.common.Authorization = 'Bearer ' + $scope.token;
-            $http.defaults.headers.common['Accept'] = "application/json";
-            $http.defaults.headers.common['Content-type'] = "application/json";
             $http.put(url)
                 .success(function (data) {
                     $scope.getMyTickets($scope.data.page);
                 })
                 .error(function (error) {
                     $scope.data.error = {};
-                    $scope.data.error.code = 'claim';
-                    $scope.data.error.message = 'Error when claiming task ' + id + '.';
+                    $scope.data.error.code = op;
+                    $scope.data.error.message = 'Error when performing operation ' + op + ' on task ' + id + '.';
                 });
 
         };

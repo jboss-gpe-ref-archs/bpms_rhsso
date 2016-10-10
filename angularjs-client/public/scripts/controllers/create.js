@@ -1,17 +1,12 @@
 'use strict';
 
 angular.module('ticketApp')
-    .controller('createTicketCtrl', function ($scope, $http, $location, util) {
+    .controller('createTicketCtrl', function ($scope, $http, $location) {
 
         $scope.data = {};
 
         $scope.createTicket = function(ticket) {
-            var url = util.getKieServerUrl() 
-                + "/kie-server/services/rest/server/containers/"
-                + util.getTicketAppContainer()
-                + "/processes/"
-                + util.getTicketProcess()
-                + "/instances";
+            var url = "/api/create";
 
             var ticketVar = {
                 project : ticket.project,
@@ -22,8 +17,6 @@ angular.module('ticketApp')
             };
 
             $http.defaults.headers.common.Authorization = 'Bearer ' + $scope.token;
-            $http.defaults.headers.common['Accept'] = "application/json";
-            $http.defaults.headers.common['Content-type'] = "application/json";
             $http.post(url, ticketVar)
                 .success(function (data) {
                     $scope.data.result = data;
