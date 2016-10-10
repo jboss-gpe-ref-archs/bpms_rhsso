@@ -516,8 +516,8 @@ Expected response:
 
 == AngularJS client
 
-The `angular-client` folder in this repository contains the code for a KIE Server client.
-The project was built on a Yeoman (http://yeoman.io) AngularJS skeleton.
+The `angularjs-client` folder in this repository contains the code for a KIE Server client. +
+The client application runs on Node.js, and uses a AngularJS frontend. The Node.js application serves as a proxy for the KIE server. +
 The application allows to:
 
 * Create process instances of the ticket handling process model described in the previous chapter, and assign the tasks to groups.
@@ -543,6 +543,7 @@ To verify correct installation:
 $ bower --version && grunt --version
 1.7.9
 grunt-cli v1.2.0
+grunt v0.4.5
 ----
 . Install the dependencies of the app, as defined in the `bower.json` file: +
 `cd` to the `angularjs-client` folder, and run the following command:
@@ -550,8 +551,7 @@ grunt-cli v1.2.0
 ----
 $ bower install
 ----
-. To run and build a distribution of our client app, we use Grunt, the JavaScript task runner. +
-To install the packages required to run and build the application (defined in the `package.json`) file, execute the following command:
+. To install the packages required to run and build the application (defined in the `package.json`) file, execute the following command:
 +
 ----
 $ npm install
@@ -559,10 +559,8 @@ $ npm install
 
 === Run the AngularJS client
 
-To run the application, we use grunt.
-
 . Review the app configuration. +
-Open the file `angularjs-client/app/scripts/config.js`. +
+Open the file `angularjs-client/config.js`. +
 Review the values for the json attributes. If you running everything locally, they should be:
 * rhsso_host : `'127.0.0.1'`
 * rhsso_port : `'8080'`
@@ -575,9 +573,9 @@ The values for the other environment settings should be ok, provided you followe
 . In a terminal window, `cd` to the `angularjs-client` directory, and execute:
 +
 ----
-$ grunt serve
+$ node server.js
 ----
-. Grunt starts the AngularJS application,bound to `localhost:8000`. A browser window is opened pointing to `http://localhost:8080`. +
+. This starts the Nodejs server, bound to `localhost:8000`. Open a browser window and navigate to `http://localhost:8080`. +
 As part of the application bootstrap, a login sequence is initiated with the RH SSO server, using the RH SSO Javascript adapter (which was installed through Bower). +
 The user is redirected to the RH SSO login screen.
 +
@@ -603,10 +601,10 @@ To login as another user, click the `Log out` link in the navigation bar. This w
 
 === A closer look at the AngularJS code
 
-If you are interested how all this works on the AngularJS side, you should have a look at the code.
+If you are interested how all this works on the Node and AngularJS side, you should have a look at the code.
 
 When the application starts, the RH SSO adapter is initiated, causing a redirect to the RH SSO server login page.   Upon successful login, the AngularJS framework is bootstrapped. +
-All this happens in the `app/scripts/app.js` script, in the `initializeKeyCloak` function
+All this happens in the `public/scripts/app.js` script, in the `initializeKeyCloak` function
 
 ----
     function initializeKeycloak() {
@@ -660,8 +658,11 @@ The token is stored in the root scope of the app.
         })
 ----
 
-Every time a request to the REST API of KIE Server is made, the token is set in the `Authorization` header of the request. +
-For example, to get the list of tasks assigned to the logged in user (in `app/scripts/controllers/mytickets.js`):
+On the server side, a number of routes are exposed using the Express framework. These routes act as proxies for the REST API of KIE server. These routes are defined in the `app/routes` folder.
+
+
+Every time a request to the Node server is made, the token is set in the `Authorization` header of the request. On the Node server side, the token value is extracted from the request, and inserted in the request to the KIE Server.+
+For example, to get the list of tasks assigned to the logged in user (in `public/scripts/controllers/mytickets.js`):
 
 ----
         $scope.getMyTickets = function(page) {
@@ -672,12 +673,10 @@ For example, to get the list of tasks assigned to the logged in user (in `app/sc
 
             $scope.data.page = page;
 
-            var url = util.getKieServerUrl()
-                + "/kie-server/services/rest/server/queries/tasks/instances/pot-owners"
+            var url = "/api/mytickets"
                 + "?page=" + page;
 
             $http.defaults.headers.common.Authorization = 'Bearer ' + $scope.token;
-            $http.defaults.headers.common['Accept'] = "application/json";
             $http.get(url)
                 .success(function (data) {
                     $scope.data.result = data['task-summary'];
@@ -689,4 +688,45 @@ For example, to get the list of tasks assigned to the logged in user (in `app/sc
                 });
 
         };
+----
+
+On the server side, the route implementation of the `/api/mytickets` endpoint builds a request to the KIE Server, and sends the reply back to the client.
+
+----
+    app.get('/api/mytickets', function(req,res) {
+
+        var page = req.query.page;
+        var endpoint = "/kie-server/services/rest/server/queries/tasks/instances/pot-owners"
+            + "?page=" + page
+            + "&user=user1";
+        var headers = {
+            'Accept': 'application/json',
+            'Authorization': req.headers['authorization']
+        };
+        var options = {
+            host: ENV.kieserver_host,
+            port: ENV.kieserver_port,
+            path: endpoint,
+            method: "GET",
+            headers: headers
+        };
+        var kieserverReq = http.request(options, function(kieserverRes) {
+            kieserverRes.setEncoding('utf-8');
+            var responseString = '';
+            kieserverRes.on('data', function(data) {
+                responseString += data;
+            });
+
+            kieserverRes.on('end', function() {
+                res.status(200);
+                res.type('json');
+                res.send(responseString);
+            });
+        });
+
+        kieserverReq.end();
+        kieserverReq.on('error', function(error) {
+            res.send(error);
+        });
+    });
 ----
